@@ -8,7 +8,7 @@ Nevertheless, the SwinSID remains a very popular SID alternative. While there ar
 
 # How to build
 
-It is assumed that you are building on a Linux system. You need to have cross AVR binutils and avr-libc installed. On OpenSuSE this can be installed with this command (run as root):
+It is assumed that you are building on a Linux system. You need to have cross AVR binutils and avr-libc installed. On (Open)SuSE this can be installed with this command (run as root):
 
 zypper install cross-avr-binutils avr-libc
 
