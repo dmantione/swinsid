@@ -8,6 +8,8 @@
 ; Lazy Jones fix developed by Máté "CodeKiller" Sebök
 ;
 ; Source code reconstruction by Daniël Mantione
+;
+; Set your editor tab size to 4.
 ;############################################################################
 
 
