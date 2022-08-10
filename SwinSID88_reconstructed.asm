@@ -8,8 +8,6 @@
 ; Lazy Jones fix developed by Máté "CodeKiller" Sebök
 ;
 ; Source code reconstruction by Daniël Mantione
-;
-; Set your editor tab size to 4.
 ;############################################################################
 
 
@@ -81,21 +79,37 @@ irq_chipselect:
     ; here on rise PHI2 + 205-268ns. The number at the start of the comment below is the lower
     ; bound (rounded to whole ns) when the instruction starts add 62.5ns to get the upper bound.
     ; The second number is the number of clock cycles the instruction will take.
-    
+
+#ifdef LAZY_JONES_FIX
 	in	r26,p_PINC	; 205 1 Read port C (PC0..PC4 = A0..A4, PC5 = D2, PC6 = reset)
 	in	r11,p_PIND	; 236 1 Read port D (PD0..PD7 = D0..D7, except PD2 which is CS)
 	sbic p_PINB,b5	; 268 1/2 If RW=0 (thus a write to sid) skip the RETI.
 	reti			; 299 1 Ignore reads from the SID.
 	in	r12,p_SREG	; 330 1 Save AVR flags register SREG
-	bst	r26,b5;		; 361 1 Load D2 into T flag
+	bst	r26,b5		; 361 1 Load D2 into T flag
 	bld	r11,b2		; 393 1 Store T into bit 2, so r11 contains full D0..D7
 	andi r26,0x1f	; 424 1 Keep bits 0..4, so r26 contains A0..A4.
 	st	X,r11		; 455 2 Store read value from databus in correct SID register
 	out	p_SREG,r12	; 518 1 Restore AVR flags register
 	sbrs r11,b0		; 549 1/2 Skip the mov if D0=1
-	mov	r28,r26		; 580 1 Copy A0..A4 to r28/yl. Purpose unknown.
+	mov	r28,r26		; 580 1 Copy A0..A4 to r28/yl. This is for the Lazy Jones fix
+					;       Further checks performed outside IRQ handler.
 	reti			; 611 1
-
+#else
+	in r26,p_PINC	; 205 1 Read port C (PC0..PC4 = A0..A4, PC5 = D2, PC6 = reset)
+	in r11,p_PIND	; 236 1 Read port D (PD0..PD7 = D0..D7, except PD2 which is CS)
+	sbrc r11,b2;	; 268 1/2 Skip next jmp if CS low (redundant, irq means it is low)
+	rjmp no_cs		; 299 1 Get out of here if CS high
+	in r12,p_SREG	; 330 1 Save AVR flags register SREG
+	bst r26,b5		; 361 1 Load D2 into T flag
+	bld r11,b2		; 393 1 Store T into bit 2, so r11 contains full D0..D7
+	andi r26,0x1f	; 424 1 Keep bits 0..4, so r26 contains A0..A4.
+	st X,r11		; 455 2 Store read value from databus in correct SID register
+	out p_SREG,r12	; 518 1 Restore AVR flags register
+no_cs:
+	reti			;  611 1
+#endif
+	
 	; Note that in a computer with a 6502 styled bus, you are expected to read the bus when PHI2
 	; falls. Due to interrupt latency this is next to impossible in a microcontroller, so the
 	; triggering on PHI2 and depending on the correct latency is a necessary alternatice.
@@ -105,7 +119,7 @@ irq_chipselect:
 
 ; Explicitely set the current address to make the assembler complain if above code
 ; is modified and increases in length.
-.org 0x01c,0xff
+.org 0x01c,0x00
 
 irq_timer0_compa:
     ; The timer 0 compare match A interrupt for every sample. It writes the computed
@@ -321,12 +335,14 @@ osc_nosync\v :
 wave_on\v :
 	eor	r25,r15			; Compare previous ctrl with current ctrl
 	bst	r25,b0			; Has the gate bit been changed?
+#ifdef LAZY_JONES_FIX
 	brts gate_changed\v	; Yes, then skip
 	; Gate bit not changed
 	cpi r28,(7*(\v - 1) + 4)	; Was ctrl\v the last register written?
 	brne gate_unchanged\v ; No, then skip gate handling
 	clr r28				; Clear r28/yl
 	bst r15,b0			; Was the gate turned on?
+#endif
 	brtc gate_unchanged\v ; No, then skip gate handling
 gate_changed\v :
 	; Gate bit changed
@@ -544,8 +560,25 @@ no_noisewave\v :
 	 sbrc r15,b3			; If test bit cleared, skip next rjmp
 	 rjmp test_bit_set\v	; If test bit set, reset oscillator (repeats each sample)
 build_wavetable_ptrh\v :
-	ldi r31,0x10			;base address of wavetable data
+	ldi r31,0x10			; base address of wavetable data
 	rjmp build_wavetable_ptrl\v
+#ifndef LAZY_JONES_FIX
+	; Dead code, purpose unknown
+	mov r24,r16				; R16 is only used below, no idea
+	sbrc r16, 5
+	add r13, r13
+	sbrc r16, 6
+	com r13
+	lds r23,poty + \v - 1	; Very weird, these are the read-only registers in the SID
+	add r13, r23
+	andi r16,0x0f	; 15
+	add r16,r31
+	mov r23,r15
+	swap r23
+	andi r23,0x0f	; 15
+	add r31,r23
+	rjmp wave_ptr_ready\v
+#endif
 no_waveform_selected\v :
 	lds r23,freqh\v
 	sts waveform_val\v ,r23
@@ -558,6 +591,7 @@ build_wavetable_ptrl\v :
     breq no_waveform_selected\v
 	add r31,r23				; high byte now points to correct wave table
 	mov r16,r31				; Save r31
+wave_ptr_ready\v:
 	bst r23,b2				; Check if pulse is selected
 	brtc no_pulse_selected\v
 	; Get the pulse width. Least significant 4 bits are thrown away.
@@ -592,7 +626,15 @@ no_pulse_selected\v :
 	mov r30,r13				; ??? this is the saved value from after the first
 							; add to the accumulator far above.
 	lpm r21,Z
-	rjmp waveval_loaded\v 
+	rjmp waveval_loaded\v
+#ifndef LAZY_JONES_FIX
+	; Dead code, purpose unknown
+	subi r21, 128
+	subi r22, 128
+	satadds r21,r22
+	mov r23,r21
+	rjmp waveval_ready\v
+#endif
 ringmodulation\v :
 	; Ring modulate voice with buddy voice
 	bst r15,b4				; Triangle enabled?
