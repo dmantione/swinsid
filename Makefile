@@ -1,10 +1,21 @@
 
-.PRECIOUS: %.o %.elf
+.PRECIOUS: %.o %.elf %.d
 
-all: SwinSID88_lazy_jones_fix.hex SwinSID88_20120524.hex
+CPPFLAGS=-traditional-cpp -I/usr/avr/sys-root/include -D__AVR_ATmega88A__ -D__ASSEMBLER__
+FIRMWARES=SwinSID88_lazy_jones_fix.hex SwinSID88_20120524.hex
 
-%.o: %.asm
-		cpp -traditional-cpp -I/usr/avr/sys-root/include -D__AVR_ATmega88A__ -D__ASSEMBLER__ $< | \
+all: $(FIRMWARES)
+
+# Dependency file is needed to make sure firmware is rebuilt when include file changes.
+%.d: %.asm
+		rm -f $@; \
+		 cpp -MM $(CPPFLAGS) $< > $@.$$$$; \
+		 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+		 rm -f $@.$$$$
+
+
+%.o: %.asm %.d
+		cpp $(CPPFLAGS) $< | \
 		  avr-as -mmcu=atmega88a -o $@
 
 %.elf: %.o swinsid_atmega88.ld
@@ -16,3 +27,5 @@ all: SwinSID88_lazy_jones_fix.hex SwinSID88_20120524.hex
 
 clean:
 		rm -f *.o *.elf *.hex
+
+include $(FIRMWARES:.hex=.d)
