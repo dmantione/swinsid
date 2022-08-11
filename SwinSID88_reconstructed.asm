@@ -1336,117 +1336,75 @@ empty1d:	.skip	1
 empty1e:	.skip	1
 empty1f:	.skip	1
 
-ramppos1l:
-	.skip	1
-envelope_val1:
-	.skip	1
-envelope_updown1:
-	.skip	1
-accu1l:
-	.skip	1
-accu1m:
-	.skip	1
-accu1h:
-	.skip	1
-previous_ctrl1:
-	.skip	1
-waveform_val1:
-	.skip	1
-ramplength1l:
-	.skip	1
-seed_c1:
-	.skip	1
-seed_a1:
-	.skip	1
-seed_b1:
-	.skip	1
-rampcounter1:
-	.skip	1
-rampcounterend1:
-	.skip	1
-ramppos1h:
-	.skip	1
-ramplength1h:
-	.skip	1
-ramppos2l:
-	.skip	1
-envelope_val2:
-	.skip	1
-envelope_updown2:
-	.skip	1
-accu2l:
-	.skip	1
-accu2m:
-	.skip	1
-accu2h:
-	.skip	1
-previous_ctrl2:
-	.skip	1
-waveform_val2:
-	.skip	1
-ramplength2l:
-	.skip	1
-seed_c2:
-	.skip	1
-seed_a2:
-	.skip	1
-seed_b2:
-	.skip	1
-rampcounter2:
-	.skip	1
-rampcounterend2:
-	.skip	1
-ramppos2h:
-	.skip	1
-ramplength2h:
-	.skip	1
-ramppos3l:
-	.skip	1
-envelope_val3:
-	.skip	1
-envelope_updown3:
-	.skip	1
-accu3l:
-	.skip	1
-accu3m:
-	.skip	1
-accu3h:
-	.skip	1
-previous_ctrl3:
-	.skip	1
-waveform_val3:
-	.skip	1
-ramplength3l:
-	.skip	1
-seed_c3:
-	.skip	1
-seed_a3:
-	.skip	1
-seed_b3:
-	.skip	1
-rampcounter3:
-	.skip	1
-rampcounterend3:
-	.skip	1
-ramppos3h:
-	.skip	1
-ramplength3h:
-	.skip	1
-filter_acc_low_l:
-	.skip	1
-filter_acc_low_h:
-	.skip	1
-filter_acc_band_l:
-	.skip	1
-filter_acc_band_h:
-	.skip	4
-sample_l:
-	.skip	1
-sample_h:
-	.skip	3
-sample_written:
-	.skip	1
-previous_volume:
-	.skip	1
-volume_change_progress:
-	.skip   1
+;
+; Internal variables of the SID simulation
+;
+; Note that each voice has exactly 16 bytes of variables
+; and the order for each voice is the same, so the same
+; variable of the next voice can be reached by adding an
+; offset of 16.
+
+; Voice 1
+ramppos1l:			.skip	1
+envelope_val1:		.skip	1
+envelope_updown1:	.skip	1
+accu1l:				.skip	1
+accu1m:				.skip	1
+accu1h:				.skip	1
+previous_ctrl1:		.skip	1
+waveform_val1:		.skip	1
+ramplength1l:		.skip	1
+seed_c1:			.skip	1
+seed_a1:			.skip	1
+seed_b1:			.skip	1
+rampcounter1:		.skip	1
+rampcounterend1:	.skip	1
+ramppos1h:			.skip	1
+ramplength1h:		.skip	1
+
+; Voice 2
+ramppos2l:			.skip	1
+envelope_val2:		.skip	1
+envelope_updown2:	.skip	1
+accu2l:				.skip	1
+accu2m:				.skip	1
+accu2h:				.skip	1
+previous_ctrl2:		.skip	1
+waveform_val2:		.skip	1
+ramplength2l:		.skip	1
+seed_c2:			.skip	1
+seed_a2:			.skip	1
+seed_b2:			.skip	1
+rampcounter2:		.skip	1
+rampcounterend2:	.skip	1
+ramppos2h:			.skip	1
+ramplength2h:		.skip	1
+
+; Voice 3
+ramppos3l:			.skip	1
+envelope_val3:		.skip	1
+envelope_updown3:	.skip	1
+accu3l:				.skip	1
+accu3m:				.skip	1
+accu3h:				.skip	1
+previous_ctrl3:		.skip	1
+waveform_val3:		.skip	1
+ramplength3l:		.skip	1
+seed_c3:			.skip	1
+seed_a3:			.skip	1
+seed_b3:			.skip	1
+rampcounter3:		.skip	1
+rampcounterend3:	.skip	1
+ramppos3h:			.skip	1
+ramplength3h:		.skip	1
+
+; Other
+filter_acc_low_l:	.skip	1
+filter_acc_low_h:	.skip	1
+filter_acc_band_l:	.skip	1
+filter_acc_band_h:	.skip	4
+sample_l:			.skip	1
+sample_h:			.skip	3
+sample_written:		.skip	1
+previous_volume:	.skip	1
+volume_change_progress:	.skip   1
