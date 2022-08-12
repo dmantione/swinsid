@@ -655,7 +655,7 @@ waveval_loaded\v :
 	;
 	; ... but mathematically this isn't the same as:
 	;
-	; r23:=(r23+r22+r21) div 4 - 128
+	; r23:=(r23+r22+r21) div 4 - 128 (and you would rather like to divide by 3)
 	add r23,r22
 	ror r23
 	add r23,r21
