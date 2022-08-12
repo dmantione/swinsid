@@ -649,6 +649,12 @@ ringmodulation\v :
 waveval_loaded\v :
 	lds r23,waveform_val\v		; save last waveform value
 	sts waveform_val\v ,r22		; store new waveform value
+	; The following code is a mathematically broken way to average, it does:
+	;
+	; r23:=(r23+r22) div 2 + r21) div 2 - 128
+	;
+	; ... but mathematically this isn't the same as:
+	;
 	; r23:=(r23+r22+r21) div 4 - 128
 	add r23,r22
 	ror r23
