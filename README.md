@@ -4,7 +4,10 @@ This is a reconstruction of the SwinSID Nano source code. The SwinSID was develo
 
 Years have passed and development of the SwinSID has stalled. The "Lazy Jones fix" firmware is still being used today. Without any source code it is difficult for others to improve the firmware. Swinkels has completely disappeared from the scene and his [SwinSID website](http://web.archive.org/web/20191212101114/http://www.swinkels.tvtom.pl/swinsid/) has now disappeared as well.
 
-Nevertheless, the SwinSID remains a very popular SID alternative. While there are SID replacements that provide better compatibility, the SwinSID remains an economical solution to bring back sound to a C64. Thus the dead situation of the firmware is bad for the community. In order to end this situation I have reconstructed the SwinSID firmware. If you assemble the source code here, you will end up with an exact copy of the SwinSID firmware. Both the "Lazy Jones fix" firmware and the last firmware from Swinkels (20120524) for the SwinSID Nano will be built.
+Nevertheless, the SwinSID remains a very popular SID alternative. While there are SID replacements that provide better compatibility, the SwinSID remains an economical solution to bring back sound to a C64. Thus the dead situation of the firmware is bad for the community. In order to end this situation I have reconstructed the SwinSID firmware. If you assemble the source code here, you will end up with an exact copy of the SwinSID firmware, actually three firmwares will be built:
+- SwinSID88_20120524.hex - This is the last release firmware by Swinkels
+- SwinSID88_lazy_jones_fix.hex - This is the "Lazy Jones Fix firmware by Codekiller. Most SwinSIDs use this firmware at the moment.
+- SwinSID88_20141027.hex - An unreleased firmware by Swinkels. It contains a cleaner fix for Lazy Jones than the fix from Codekiller, but removes checks of the RW line and it is reported that it can cause glitches.
 
 # How to build
 
