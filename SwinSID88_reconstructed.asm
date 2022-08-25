@@ -15,6 +15,10 @@
 
 
 #include <avr/io.h>
+#include "avr_mcu_section_asm.h"
+
+AVR_MCU 32000000 atmega88
+AVR_MCU_VOLTAGES 5000 5000 5000
 
 .text
 
@@ -99,6 +103,20 @@ irq_chipselect:
 					;       Further checks performed outside IRQ handler.
 	reti			; 611 1
 #else
+#ifdef SWINKELS_20141027
+	in r26,p_PINC	; 205 1 Read port C (PC0..PC4 = A0..A4, PC5 = D2, PC6 = reset)
+	in r11,p_PIND	; 236 1 Read port D (PD0..PD7 = D0..D7, except PD2 which is CS)
+	in r12,p_SREG	; 268 1 Save AVR flags register SREG
+	bst r26,b5		; 299 1 Load D2 into T flag
+	bld r11,b2		; 330 1 Store T into bit 2, so r11 contains full D0..D7
+	andi r26,0x1f	; 361 1 Keep bits 0..4, so r26 contains A0..A4.
+	st X,r11		; 393 2 Store read value from databus in correct SID register
+	subi r26,0xe0	; 455 1 point to table of modified registers
+	sbrs r11,b0		; 486 1/2 If bit 0 set (gate bit), skip next st (Lazy Jones Fix)
+	st X,r26		; 518 1 mark register modified
+	out p_SREG,r12	; 549 1 Restore AVR flags register
+	reti			; 580 1
+#else
 	in r26,p_PINC	; 205 1 Read port C (PC0..PC4 = A0..A4, PC5 = D2, PC6 = reset)
 	in r11,p_PIND	; 236 1 Read port D (PD0..PD7 = D0..D7, except PD2 which is CS)
 	sbrc r11,b2;	; 268 1/2 Skip next jmp if CS low (redundant, irq means it is low)
@@ -110,7 +128,8 @@ irq_chipselect:
 	st X,r11		; 455 2 Store read value from databus in correct SID register
 	out p_SREG,r12	; 518 1 Restore AVR flags register
 no_cs:
-	reti			;  611 1
+	reti			; 549 1
+#endif
 #endif
 	
 	; Note that in a computer with a 6502 styled bus, you are expected to read the bus when PHI2
@@ -324,10 +343,15 @@ osc_nosync\v :
 	;************************************************************************
 	;
 	lds r18,envelope_val\v
+#ifndef SWINKELS_20141027
 	lds r15,ctrl\v
+#endif
 	lds r21,ad\v
 	lds r22,sr\v
 	lds r25,previous_ctrl\v
+#ifdef SWINKELS_20141027
+	lds r15,ctrl\v
+#endif
 	sts previous_ctrl\v ,r15
 	mov r23,r25
 	andi r23,0xf0		; Was there a waveform enabled in previous sample?
@@ -345,6 +369,16 @@ wave_on\v :
 	brne gate_unchanged\v ; No, then skip gate handling
 	clr r28				; Clear r28/yl
 	bst r15,b0			; Was the gate turned on?
+#endif
+#ifdef SWINKELS_20141027
+	brts gate_changed\v	; Yes, then skip
+	; Gate bit not changed
+	lds r23,ctrl\v + 0x20
+	tst r23
+	breq gate_unchanged\v
+	clr r23
+	sts ctrl\v + 0x20,r23
+	bst r15,b0
 #endif
 	brtc gate_unchanged\v ; No, then skip gate handling
 gate_changed\v :
@@ -1341,6 +1375,12 @@ env3:		.skip	1
 empty1d:	.skip	1
 empty1e:	.skip	1
 empty1f:	.skip	1
+
+#ifdef SWINKELS_20141027
+; One byte for each register to flag if it has been modified
+reg_mod_table:	.skip 32
+#endif
+
 
 ;
 ; Internal variables of the SID simulation
