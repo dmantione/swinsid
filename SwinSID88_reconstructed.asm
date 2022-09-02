@@ -17,6 +17,7 @@
 #include <avr/io.h>
 #include "avr_mcu_section_asm.h"
 
+; Generate .mmcu section for SimAVR
 AVR_MCU 32000000 atmega88
 AVR_MCU_VOLTAGES 5000 5000 5000
 
