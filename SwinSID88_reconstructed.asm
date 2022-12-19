@@ -21,7 +21,7 @@
 AVR_MCU 32000000 atmega88
 AVR_MCU_VOLTAGES 5000 5000 5000
 
-.text
+.section .text
 
 ; Convenient symbols for port numbers when using in/out
 
@@ -1335,7 +1335,7 @@ decrel_rates:
 	.byte  38, 40, 43, 45, 47, 50, 52, 55, 57, 60, 63, 65, 68, 71, 74, 77
 	.byte  79, 82, 85, 88, 91, 94, 97,100,103,106,109,112,116,119,122,125
 
-	.bss
+.section .bss
 
 ;-----------------------------------------------------
 ; SID registers at bottom of SRAM
